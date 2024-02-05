@@ -29,7 +29,7 @@ const pinIcon = new L.divIcon({
     iconAnchor: [12, 24],
 });
 
-const Map = ({ contextMenus, directions }) => {
+const Map = ({ contextMenus, waypoints }) => {
     const [isDepartureSet, setIsDepartureSet] = useState(false);
     const [isDestinationSet, setIsDestinationSet] = useState(false);
     const [map, setMap] = useState(null);
@@ -124,10 +124,10 @@ const Map = ({ contextMenus, directions }) => {
                         icon={pinIcon}
                     />
                 )}
-                {directions.length > 0 && (
+                {waypoints.length > 0 && (
                     <Polyline
                         pathOptions={{ color: "#0C1B2A" }}
-                        positions={directions}
+                        positions={waypoints}
                     />
                 )}
             </MapContainer>

@@ -12,7 +12,7 @@ export async function POST(request) {
 
     console.log(payload);
 
-    await fetch("http://localhost:8080/ors/v2/directions/driving-car", {
+    await fetch("http://182.253.86.90:8080/ors/v2/directions/driving-car", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 
@@ -14,6 +15,7 @@ export default function RootLayout({ children }) {
         <html lang="en">
             <body className={inter.className}>
                 <div className="w-screen h-screen">
+                    <NextTopLoader color="#000000" showSpinner={false} />
                     <Navbar />
                     {children}
                 </div>
