@@ -29,7 +29,42 @@ const pinIcon = new L.divIcon({
     iconAnchor: [12, 24],
 });
 
-const Map = ({ contextMenus, waypoints }) => {
+const LayoutListener = ({ isMenuOpen }) => {
+    const map = useMap();
+    useEffect(() => {
+        const currentCenter = map?.getCenter();
+        const bounds = map?.getBounds();
+        console.log(bounds.getNorthEast());
+        console.log(bounds.getNorthWest());
+        let newNorthEast = [
+            bounds.getNorthEast().lat,
+            bounds.getSouthWest().lng +
+                (2 * (bounds.getNorthEast().lng - bounds.getSouthWest().lng)) /
+                    3,
+        ];
+        let newSouthEast = [
+            bounds.getSouthWest().lat,
+            bounds.getSouthWest().lng +
+                (2 * (bounds.getNorthEast().lng - bounds.getSouthWest().lng)) /
+                    3,
+        ];
+        const newCenter = [
+            (newNorthEast[0] + bounds.getSouthWest().lat) / 2,
+            (newNorthEast[1] + bounds.getSouthWest().lng) / 2,
+        ];
+        console.log(bounds);
+        console.log(newNorthEast);
+        console.log(newNorthEast[0]);
+        console.log(bounds.getSouthWest().lat);
+        console.log(newCenter);
+
+        map?.invalidateSize();
+        map?.setView(newCenter);
+    }, [map, isMenuOpen]);
+    return null;
+};
+
+const Map = ({ contextMenus, waypoints, isMenuOpen }) => {
     const [isDepartureSet, setIsDepartureSet] = useState(false);
     const [isDestinationSet, setIsDestinationSet] = useState(false);
     const [map, setMap] = useState(null);
@@ -44,9 +79,16 @@ const Map = ({ contextMenus, waypoints }) => {
     );
 
     useEffect(() => {
+        if (!isMenuOpen) {
+            map?.invalidateSize();
+        }
+    }, [isMenuOpen, map]);
+
+    useEffect(() => {
         console.log(coords.mapBounds);
 
         if (map && coords.mapBounds[0] !== 0) {
+            map.invalidateSize();
             map.fitBounds([
                 [coords.mapBounds[1], coords.mapBounds[0]],
                 [coords.mapBounds[3], coords.mapBounds[2]],
@@ -105,6 +147,7 @@ const Map = ({ contextMenus, waypoints }) => {
                 contextmenuWidth={140}
                 contextmenuItems={contextMenus}
             >
+                {/* <LayoutListener isMenuOpen={isMenuOpen} /> */}
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 {isDestinationSet && (
                     <Marker

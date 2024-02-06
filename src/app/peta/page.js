@@ -21,6 +21,7 @@ import { decode } from "@googlemaps/polyline-codec";
 import { useMapCoordsStore } from "@/store/store";
 import { Button } from "@/components/ui/button";
 import { formatSecondstoTime } from "@/lib/helpers";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const Maps = dynamic(() => import("@/components/Map"), {
     ssr: false,
@@ -141,9 +142,19 @@ export default function MainMap() {
 
     return (
         <div className="w-screen h-[calc(100vh-52px)] relative">
+            <Button
+                className="absolute right-0 top-1/2 z-[501] bg-white p-0 rounded-r-none hover:bg-neutral-200 drop-shadow-xl px-1"
+                onClick={() => setIsFindingDirection(!isFindingDirection)}
+            >
+                {isFindingDirection ? (
+                    <ChevronRight size={24} strokeWidth={2.5} color="black" />
+                ) : (
+                    <ChevronLeft size={24} strokeWidth={2.5} color="black" />
+                )}
+            </Button>
             {isFindingDirection && (
-                <div className="absolute right-0 top-0 z-[500] w-1/3 drop-shadow-xl">
-                    <div className="mt-4 mr-4 bg-white">
+                <div className="absolute right-0 top-0 z-[500] w-1/3">
+                    <div className="bg-white">
                         <div className="p-4 flex flex-col gap-2">
                             <div className="flex gap-2">
                                 <Input
@@ -230,7 +241,17 @@ export default function MainMap() {
                     </div>
                 </div>
             )}
-            <Maps contextMenus={contextMenus} waypoints={waypoints} />
+            <div
+                className={
+                    isFindingDirection ? "w-2/3 h-full" : "w-full h-full"
+                }
+            >
+                <Maps
+                    contextMenus={contextMenus}
+                    waypoints={waypoints}
+                    isMenuOpen={isFindingDirection}
+                />
+            </div>
         </div>
     );
 }
