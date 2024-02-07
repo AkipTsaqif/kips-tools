@@ -1,5 +1,5 @@
 export async function POST(request) {
-    const { departure, destination } = await request.json();
+    const { departure, destination, preference } = await request.json();
     let result = {};
 
     const payload = {
@@ -7,7 +7,7 @@ export async function POST(request) {
             [departure.lng, departure.lat],
             [destination.lng, destination.lat],
         ],
-        preference: "shortest",
+        preference: preference,
     };
 
     console.log(payload);

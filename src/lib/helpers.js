@@ -30,3 +30,7 @@ export const formatSecondstoTime = (seconds) => {
 
     return result;
 };
+
+export const splitString = (str, splitter) => {
+    return str.split(splitter).slice(0, 4).join(", ");
+};

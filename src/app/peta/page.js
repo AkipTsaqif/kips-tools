@@ -6,17 +6,14 @@ import dynamic from "next/dynamic";
 import Map from "@/components/Map";
 import { Input } from "@/components/ui/input";
 import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-} from "@/components/ui/command";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { decode } from "@googlemaps/polyline-codec";
 import { useMapCoordsStore } from "@/store/store";
 import { Button } from "@/components/ui/button";
@@ -52,6 +49,7 @@ const frameworks = [
 
 export default function MainMap() {
     const [isFindingDirection, setIsFindingDirection] = useState(false);
+    const [preference, setPreference] = useState("recommended");
     const [directionFound, setDirectionFound] = useState(false);
     const [departurePoint, setDeparturePoint] = useState(null);
     const [departureAddr, setDepartureAddr] = useState("");
@@ -95,21 +93,23 @@ export default function MainMap() {
     const getAddress = async (dept, dest) => {
         if (dept)
             await fetch(
-                `https://nominatim.openstreetmap.org/reverse?lat=${dept.lat}&lon=${dept.lng}&format=json`
+                `https://nominatim.openstreetmap.org/reverse?lat=${dept.lat}&lon=${dept.lng}&format=json&accept-language=id`
             )
                 .then((resp) => resp.json())
                 .then((data) => {
                     console.log(data);
                     setDepartureAddr(data.display_name);
+                    setCoords.setDepartureAddress(data.display_name);
                 });
         if (dest)
             await fetch(
-                `https://nominatim.openstreetmap.org/reverse?lat=${dest.lat}&lon=${dest.lng}&format=json`
+                `https://nominatim.openstreetmap.org/reverse?lat=${dest.lat}&lon=${dest.lng}&format=json&accept-language=id`
             )
                 .then((resp) => resp.json())
                 .then((data) => {
                     console.log(data);
                     setDestinationAddr(data.display_name);
+                    setCoords.setDestinationAddress(data.display_name);
                 });
     };
 
@@ -124,6 +124,7 @@ export default function MainMap() {
             body: JSON.stringify({
                 departure: departurePoint,
                 destination: destinationPoint,
+                preference,
             }),
         })
             .then((resp) => resp.json())
@@ -139,6 +140,12 @@ export default function MainMap() {
             });
         // setIsFindingDirection(false);
     };
+
+    useEffect(() => {
+        if (departurePoint && destinationPoint) {
+            getDirection();
+        }
+    }, [departurePoint, destinationPoint, preference]);
 
     return (
         <div className="w-screen h-[calc(100vh-52px)] relative">
@@ -156,48 +163,82 @@ export default function MainMap() {
                 <div className="absolute right-0 top-0 z-[500] w-1/3">
                     <div className="bg-white">
                         <div className="p-4 flex flex-col gap-2">
-                            <div className="flex gap-2">
-                                <Input
-                                    className="w-2/5"
-                                    value={
-                                        departurePoint &&
-                                        `${departurePoint.lat.toFixed(
-                                            4
-                                        )}, ${departurePoint.lng.toFixed(4)}`
-                                    }
-                                    placeholder="Titik awal"
-                                />
-                                <Input
-                                    className="w-3/5"
-                                    value={departureAddr}
-                                    placeholder="Alamat"
-                                />
+                            <div className="w-full flex flex-col mb-2">
+                                <span className="text-xs">Preferensi Rute</span>
+                                <Select
+                                    onValueChange={(e) => setPreference(e)}
+                                    defaultValue={preference}
+                                >
+                                    <SelectTrigger className="w-full focus:ring-0">
+                                        <SelectValue placeholder="Pilih preferensi rute" />
+                                    </SelectTrigger>
+                                    <SelectContent className="z-[501] focus:ring-0">
+                                        <SelectGroup>
+                                            <SelectItem value="recommended">
+                                                Rekomendasi
+                                            </SelectItem>
+                                            <SelectItem value="fastest">
+                                                Tercepat
+                                            </SelectItem>
+                                            <SelectItem value="shortest">
+                                                Terpendek
+                                            </SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
                             </div>
-                            <div className="flex gap-2">
-                                <Input
-                                    className="w-2/5"
-                                    value={
-                                        destinationPoint &&
-                                        `${destinationPoint.lat.toFixed(
-                                            4
-                                        )}, ${destinationPoint.lng.toFixed(4)}`
-                                    }
-                                    placeholder="Titik awal"
-                                />
-                                <Input
-                                    className="w-3/5"
-                                    value={destinationAddr}
-                                    placeholder="Alamat"
-                                />
+                            <div className="flex flex-col">
+                                <span className="text-xs">Dari</span>
+                                <div className="flex gap-2">
+                                    <Input
+                                        className="w-2/5"
+                                        value={
+                                            departurePoint &&
+                                            `${departurePoint.lat.toFixed(
+                                                4
+                                            )}, ${departurePoint.lng.toFixed(
+                                                4
+                                            )}`
+                                        }
+                                        placeholder="Titik awal"
+                                    />
+                                    <Input
+                                        className="w-3/5"
+                                        value={departureAddr}
+                                        placeholder="Alamat"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <span className="text-xs">Ke</span>
+                                <div className="flex gap-2">
+                                    <Input
+                                        className="w-2/5"
+                                        value={
+                                            destinationPoint &&
+                                            `${destinationPoint.lat.toFixed(
+                                                4
+                                            )}, ${destinationPoint.lng.toFixed(
+                                                4
+                                            )}`
+                                        }
+                                        placeholder="Titik tujuan"
+                                    />
+                                    <Input
+                                        className="w-3/5"
+                                        value={destinationAddr}
+                                        placeholder="Alamat"
+                                    />
+                                </div>
                             </div>
 
-                            <Button
+                            {/* <Button
                                 onClick={getDirection}
                                 disabled={!destinationPoint || !departurePoint}
                                 className="disabled:bg-neutral-200"
                             >
                                 Cari arah
-                            </Button>
+                            </Button> */}
                             <div className="flex flex-col my-4">
                                 {directionFound ? (
                                     <div className="flex gap-2 w-full">

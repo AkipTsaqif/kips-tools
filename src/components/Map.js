@@ -5,6 +5,7 @@ import {
     TileLayer,
     Marker,
     Popup,
+    Tooltip,
     useMap,
     Polyline,
 } from "react-leaflet";
@@ -12,6 +13,7 @@ import { useMapCoordsStore } from "@/store/store";
 import { MapPin } from "lucide-react";
 import ReactDOMServer from "react-dom/server";
 import L from "leaflet";
+import { splitString } from "@/lib/helpers";
 import "leaflet/dist/leaflet.css";
 import "leaflet-contextmenu";
 // import "leaflet-contextmenu/dist/leaflet.contextmenu.css";
@@ -74,9 +76,14 @@ const Map = ({ contextMenus, waypoints, isMenuOpen }) => {
             mapCoords: state.mapCoords,
             mapBounds: state.mapBounds,
             departureCoords: state.departureCoords,
+            departureAddress: state.departureAddress,
             destinationCoords: state.destinationCoords,
+            destinationAddress: state.destinationAddress,
         }))
     );
+
+    const deptAddress = splitString(coords.departureAddress, ",", 4);
+    const destAddress = splitString(coords.destinationAddress, ",", 4);
 
     useEffect(() => {
         if (!isMenuOpen) {
@@ -156,7 +163,13 @@ const Map = ({ contextMenus, waypoints, isMenuOpen }) => {
                             parseFloat(coords.destinationCoords.lng),
                         ]}
                         icon={pinIcon}
-                    />
+                    >
+                        <Tooltip permanent direction="right">
+                            <p className="w-[300px] break-normal">
+                                {destAddress}
+                            </p>
+                        </Tooltip>
+                    </Marker>
                 )}
                 {isDepartureSet && (
                     <Marker
@@ -165,7 +178,13 @@ const Map = ({ contextMenus, waypoints, isMenuOpen }) => {
                             parseFloat(coords.departureCoords.lng),
                         ]}
                         icon={pinIcon}
-                    />
+                    >
+                        <Tooltip permanent direction="right">
+                            <p className="w-[300px] break-normal">
+                                {deptAddress}
+                            </p>
+                        </Tooltip>
+                    </Marker>
                 )}
                 {waypoints.length > 0 && (
                     <Polyline
