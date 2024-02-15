@@ -10,7 +10,7 @@ import {
     Polyline,
 } from "react-leaflet";
 import { useMapCoordsStore } from "@/store/store";
-import { MapPin } from "lucide-react";
+import { Circle, MapPin } from "lucide-react";
 import ReactDOMServer from "react-dom/server";
 import L from "leaflet";
 import { splitString } from "@/lib/helpers";
@@ -29,6 +29,19 @@ const pinIcon = new L.divIcon({
         />
     ),
     iconAnchor: [12, 24],
+});
+
+const departurePinIcon = new L.divIcon({
+    className: "pin-icon",
+    html: ReactDOMServer.renderToString(
+        <Circle
+            color="black"
+            fill="white"
+            strokeWidth={5}
+            className="w-5 h-5"
+        />
+    ),
+    iconAnchor: [10, 10],
 });
 
 const LayoutListener = ({ isMenuOpen }) => {
@@ -177,7 +190,7 @@ const Map = ({ contextMenus, waypoints, isMenuOpen }) => {
                             parseFloat(coords.departureCoords.lat),
                             parseFloat(coords.departureCoords.lng),
                         ]}
-                        icon={pinIcon}
+                        icon={departurePinIcon}
                     >
                         <Tooltip permanent direction="right">
                             <p className="w-[300px] break-normal">

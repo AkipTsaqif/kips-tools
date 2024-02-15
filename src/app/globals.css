@@ -97,6 +97,7 @@ body {
     font-size: medium !important;
     font-family: Inter, sans-serif !important;
     font-weight: 900 !important;
+    margin-left: 18px !important;
     box-shadow: none !important;
     max-width: 400px !important;
     white-space: break-spaces !important;

@@ -18,7 +18,7 @@ import { decode } from "@googlemaps/polyline-codec";
 import { useMapCoordsStore } from "@/store/store";
 import { Button } from "@/components/ui/button";
 import { formatSecondstoTime } from "@/lib/helpers";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowDownUp, ChevronLeft, ChevronRight } from "lucide-react";
 
 const Maps = dynamic(() => import("@/components/Map"), {
     ssr: false,
@@ -65,7 +65,7 @@ export default function MainMap() {
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState("");
 
-    const setCoords = useMapCoordsStore();
+    const mapCoords = useMapCoordsStore();
 
     const contextMenus = [
         {
@@ -73,7 +73,7 @@ export default function MainMap() {
             callback: (e) => {
                 console.log(e.latlng);
                 setDeparturePoint(e.latlng);
-                setCoords.setDepartureCoords(e.latlng.lat, e.latlng.lng);
+                mapCoords.setDepartureCoords(e.latlng.lat, e.latlng.lng);
                 setIsFindingDirection(true);
                 getAddress(e.latlng, null);
             },
@@ -83,7 +83,7 @@ export default function MainMap() {
             callback: (e) => {
                 console.log(e.latlng);
                 setDestinationPoint(e.latlng);
-                setCoords.setDestinationCoords(e.latlng.lat, e.latlng.lng);
+                mapCoords.setDestinationCoords(e.latlng.lat, e.latlng.lng);
                 setIsFindingDirection(true);
                 getAddress(null, e.latlng);
             },
@@ -99,7 +99,7 @@ export default function MainMap() {
                 .then((data) => {
                     console.log(data);
                     setDepartureAddr(data.display_name);
-                    setCoords.setDepartureAddress(data.display_name);
+                    mapCoords.setDepartureAddress(data.display_name);
                 });
         if (dest)
             await fetch(
@@ -109,7 +109,7 @@ export default function MainMap() {
                 .then((data) => {
                     console.log(data);
                     setDestinationAddr(data.display_name);
-                    setCoords.setDestinationAddress(data.display_name);
+                    mapCoords.setDestinationAddress(data.display_name);
                 });
     };
 
@@ -131,7 +131,7 @@ export default function MainMap() {
             .then((data) => {
                 console.log(data);
                 if (data.status === 200) {
-                    setCoords.setMapBounds(data.result.bbox);
+                    mapCoords.setMapBounds(data.result.bbox);
                     setDirectionFound(true);
                     setWaypoints(decode(data.result.routes[0].geometry));
                     setDirections(data.result.routes[0].segments[0].steps);
@@ -139,6 +139,23 @@ export default function MainMap() {
                 }
             });
         // setIsFindingDirection(false);
+    };
+
+    const reversePoint = () => {
+        const temp = departurePoint;
+        setDeparturePoint(destinationPoint);
+        mapCoords.setDepartureCoords(
+            destinationPoint.lat,
+            destinationPoint.lng
+        );
+        setDestinationPoint(temp);
+        mapCoords.setDestinationCoords(temp.lat, temp.lng);
+
+        const tempAddr = departureAddr;
+        setDepartureAddr(destinationAddr);
+        mapCoords.setDepartureAddress(destinationAddr);
+        setDestinationAddr(tempAddr);
+        mapCoords.setDestinationAddress(tempAddr);
     };
 
     useEffect(() => {
@@ -162,7 +179,7 @@ export default function MainMap() {
             {isFindingDirection && (
                 <div className="absolute right-0 top-0 z-[500] w-1/3">
                     <div className="bg-white">
-                        <div className="p-4 flex flex-col gap-2">
+                        <div className="p-4 flex flex-col gap-2 relative">
                             <div className="w-full flex flex-col mb-2">
                                 <span className="text-xs">Preferensi Rute</span>
                                 <Select
@@ -209,6 +226,21 @@ export default function MainMap() {
                                     />
                                 </div>
                             </div>
+                            <Button
+                                className="absolute top-36 left-1/2 transform -translate-x-1/2 bg-transparent hover:bg-neutral-100 p-0 px-2 h-[30px]"
+                                disabled={!departurePoint || !destinationPoint}
+                                onClick={() => reversePoint()}
+                            >
+                                <ArrowDownUp
+                                    size={18}
+                                    strokeWidth={2.5}
+                                    color={
+                                        !departurePoint || !destinationPoint
+                                            ? "gray"
+                                            : "black"
+                                    }
+                                />
+                            </Button>
                             <div>
                                 <span className="text-xs">Ke</span>
                                 <div className="flex gap-2">
