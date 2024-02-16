@@ -61,6 +61,7 @@ export default function MainMap() {
         distance: 0,
         duration: 0,
     });
+    const [error, setError] = useState(null);
 
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState("");
@@ -133,9 +134,14 @@ export default function MainMap() {
                 if (data.status === 200) {
                     mapCoords.setMapBounds(data.result.bbox);
                     setDirectionFound(true);
+                    setError(null);
                     setWaypoints(decode(data.result.routes[0].geometry));
                     setDirections(data.result.routes[0].segments[0].steps);
                     setRouteStatistics(data.result.routes[0].summary);
+                }
+                if (data.status === 400) {
+                    setDirectionFound(true);
+                    setError(data.result.error);
                 }
             });
         // setIsFindingDirection(false);
@@ -272,7 +278,7 @@ export default function MainMap() {
                                 Cari arah
                             </Button> */}
                             <div className="flex flex-col my-4">
-                                {directionFound ? (
+                                {directionFound && !error && (
                                     <div className="flex gap-2 w-full">
                                         <div className="flex justify-between w-full">
                                             <div className="flex flex-col w-1/2">
@@ -304,9 +310,17 @@ export default function MainMap() {
                                             </div>
                                         </div>
                                     </div>
-                                ) : (
+                                )}
+                                {!directionFound && (
                                     <p className="text-sm text-center text-neutral-300">
                                         Menunggu rute terbentuk
+                                    </p>
+                                )}
+                                {error && (
+                                    <p className="text-sm text-center text-red-600">
+                                        {error.code === 2009
+                                            ? `Error ${error.code}: Rute tidak ditemukan untuk kedua titik tersebut`
+                                            : `Error ${error.code}: ${error.message}`}
                                     </p>
                                 )}
                             </div>

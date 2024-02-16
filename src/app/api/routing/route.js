@@ -25,6 +25,14 @@ export async function POST(request) {
             result = data;
         });
 
+    if (result.hasOwnProperty("error")) {
+        return Response.json({
+            status: 400,
+            message: "Bad Request",
+            result,
+        });
+    }
+
     return Response.json({
         status: 200,
         message: "OK",
