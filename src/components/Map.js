@@ -5,13 +5,15 @@ import {
     TileLayer,
     Marker,
     Popup,
+    Tooltip,
     useMap,
     Polyline,
 } from "react-leaflet";
 import { useMapCoordsStore } from "@/store/store";
-import { MapPin } from "lucide-react";
+import { Circle, MapPin } from "lucide-react";
 import ReactDOMServer from "react-dom/server";
 import L from "leaflet";
+import { splitString } from "@/lib/helpers";
 import "leaflet/dist/leaflet.css";
 import "leaflet-contextmenu";
 // import "leaflet-contextmenu/dist/leaflet.contextmenu.css";
@@ -29,7 +31,55 @@ const pinIcon = new L.divIcon({
     iconAnchor: [12, 24],
 });
 
-const Map = ({ contextMenus, directions }) => {
+const departurePinIcon = new L.divIcon({
+    className: "pin-icon",
+    html: ReactDOMServer.renderToString(
+        <Circle
+            color="black"
+            fill="white"
+            strokeWidth={5}
+            className="w-5 h-5"
+        />
+    ),
+    iconAnchor: [10, 10],
+});
+
+const LayoutListener = ({ isMenuOpen }) => {
+    const map = useMap();
+    useEffect(() => {
+        const currentCenter = map?.getCenter();
+        const bounds = map?.getBounds();
+        console.log(bounds.getNorthEast());
+        console.log(bounds.getNorthWest());
+        let newNorthEast = [
+            bounds.getNorthEast().lat,
+            bounds.getSouthWest().lng +
+                (2 * (bounds.getNorthEast().lng - bounds.getSouthWest().lng)) /
+                    3,
+        ];
+        let newSouthEast = [
+            bounds.getSouthWest().lat,
+            bounds.getSouthWest().lng +
+                (2 * (bounds.getNorthEast().lng - bounds.getSouthWest().lng)) /
+                    3,
+        ];
+        const newCenter = [
+            (newNorthEast[0] + bounds.getSouthWest().lat) / 2,
+            (newNorthEast[1] + bounds.getSouthWest().lng) / 2,
+        ];
+        console.log(bounds);
+        console.log(newNorthEast);
+        console.log(newNorthEast[0]);
+        console.log(bounds.getSouthWest().lat);
+        console.log(newCenter);
+
+        map?.invalidateSize();
+        map?.setView(newCenter);
+    }, [map, isMenuOpen]);
+    return null;
+};
+
+const Map = ({ contextMenus, waypoints, isMenuOpen }) => {
     const [isDepartureSet, setIsDepartureSet] = useState(false);
     const [isDestinationSet, setIsDestinationSet] = useState(false);
     const [map, setMap] = useState(null);
@@ -39,14 +89,26 @@ const Map = ({ contextMenus, directions }) => {
             mapCoords: state.mapCoords,
             mapBounds: state.mapBounds,
             departureCoords: state.departureCoords,
+            departureAddress: state.departureAddress,
             destinationCoords: state.destinationCoords,
+            destinationAddress: state.destinationAddress,
         }))
     );
+
+    const deptAddress = splitString(coords.departureAddress, ",", 4);
+    const destAddress = splitString(coords.destinationAddress, ",", 4);
+
+    useEffect(() => {
+        if (!isMenuOpen) {
+            map?.invalidateSize();
+        }
+    }, [isMenuOpen, map]);
 
     useEffect(() => {
         console.log(coords.mapBounds);
 
         if (map && coords.mapBounds[0] !== 0) {
+            map.invalidateSize();
             map.fitBounds([
                 [coords.mapBounds[1], coords.mapBounds[0]],
                 [coords.mapBounds[3], coords.mapBounds[2]],
@@ -105,6 +167,7 @@ const Map = ({ contextMenus, directions }) => {
                 contextmenuWidth={140}
                 contextmenuItems={contextMenus}
             >
+                {/* <LayoutListener isMenuOpen={isMenuOpen} /> */}
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 {isDestinationSet && (
                     <Marker
@@ -113,7 +176,13 @@ const Map = ({ contextMenus, directions }) => {
                             parseFloat(coords.destinationCoords.lng),
                         ]}
                         icon={pinIcon}
-                    />
+                    >
+                        <Tooltip permanent direction="right">
+                            <p className="w-[300px] break-normal">
+                                {destAddress}
+                            </p>
+                        </Tooltip>
+                    </Marker>
                 )}
                 {isDepartureSet && (
                     <Marker
@@ -121,13 +190,19 @@ const Map = ({ contextMenus, directions }) => {
                             parseFloat(coords.departureCoords.lat),
                             parseFloat(coords.departureCoords.lng),
                         ]}
-                        icon={pinIcon}
-                    />
+                        icon={departurePinIcon}
+                    >
+                        <Tooltip permanent direction="right">
+                            <p className="w-[300px] break-normal">
+                                {deptAddress}
+                            </p>
+                        </Tooltip>
+                    </Marker>
                 )}
-                {directions.length > 0 && (
+                {waypoints.length > 0 && (
                     <Polyline
                         pathOptions={{ color: "#0C1B2A" }}
-                        positions={directions}
+                        positions={waypoints}
                     />
                 )}
             </MapContainer>

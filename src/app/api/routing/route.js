@@ -1,5 +1,5 @@
 export async function POST(request) {
-    const { departure, destination } = await request.json();
+    const { departure, destination, preference } = await request.json();
     let result = {};
 
     const payload = {
@@ -7,12 +7,12 @@ export async function POST(request) {
             [departure.lng, departure.lat],
             [destination.lng, destination.lat],
         ],
-        preference: "shortest",
+        preference: preference,
     };
 
     console.log(payload);
 
-    await fetch("http://localhost:8080/ors/v2/directions/driving-car", {
+    await fetch("http://182.253.86.90:8080/ors/v2/directions/driving-car", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -24,6 +24,14 @@ export async function POST(request) {
             console.log(data);
             result = data;
         });
+
+    if (result.hasOwnProperty("error")) {
+        return Response.json({
+            status: 400,
+            message: "Bad Request",
+            result,
+        });
+    }
 
     return Response.json({
         status: 200,

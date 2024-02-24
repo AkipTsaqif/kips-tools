@@ -90,6 +90,22 @@ body {
     font-size: 10px;
 }
 
+.leaflet-tooltip {
+    background-color: transparent !important;
+    border: none !important;
+    color: #fff !important;
+    font-size: medium !important;
+    font-family: Inter, sans-serif !important;
+    font-weight: 900 !important;
+    margin-left: 18px !important;
+    box-shadow: none !important;
+    max-width: 400px !important;
+    white-space: break-spaces !important;
+    line-height: 1.25 !important;
+    text-shadow: -2px -2px 0 #000, 0 -2px 0 #000, 2px -2px 0 #000, 2px 0 0 #000,
+        2px 2px 0 #000, 0 2px 0 #000, -2px 2px 0 #000, -2px 0 0 #000;
+}
+
 .leaflet-contextmenu {
     display: none;
     box-shadow: 0 1px 7px rgba(0, 0, 0, 0.4);
