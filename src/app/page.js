@@ -43,6 +43,19 @@ export default function Home() {
                             </CardContent>
                         </Card>
                     </Link>
+                    <Link href="/link-shortener">
+                        <Card className="flex justify-center items-center w-[160px] h-[160px] cursor-pointer hover:bg-neutral-100">
+                            <CardContent className="flex flex-col items-center p-0">
+                                <p>Link Shortener</p>
+                                <Image
+                                    src="/word-finder.png"
+                                    width={80}
+                                    height={80}
+                                    alt="Pencari kata"
+                                />
+                            </CardContent>
+                        </Card>
+                    </Link>
                 </div>
             </div>
         </div>
